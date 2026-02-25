@@ -1,0 +1,70 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  name                String?
+  bio                 String?
+  avatarUrl           String?
+  passwordHash        String               @default("")
+  tasks               Task[]
+  presets             Preset[]
+  weeklyRequiredTasks WeeklyRequiredTask[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model Task {
+  id                   String              @id @default(uuid())
+  title                String
+  description          String?
+  priority             String              // Rendah, Sedang, Tinggi
+  consequence          String?
+  time                 DateTime
+  completed            Boolean             @default(false)
+  date                 DateTime            // For categorization
+  userId               String
+  user                 User                @relation(fields: [userId], references: [id])
+  weeklyRequiredTaskId String?
+  weeklyRequiredTask   WeeklyRequiredTask? @relation(fields: [weeklyRequiredTaskId], references: [id])
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+}
+
+model WeeklyRequiredTask {
+  id          String   @id @default(uuid())
+  title       String
+  day         String   // senin, selasa, etc.
+  startTime   String   // HH:mm
+  endTime     String   // HH:mm
+  location    String
+  note        String
+  priority    String   @default("Tinggi")
+  active      Boolean  @default(true)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  tasks       Task[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Preset {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  priority    String
+  day         String   // senin, selasa, etc.
+  time        DateTime
+  active      Boolean  @default(true)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
